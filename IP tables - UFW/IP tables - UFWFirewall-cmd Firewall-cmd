@@ -1,0 +1,40 @@
+# 1. Habilitar servicios HTTP, FTP y SSH
+sudo systemctl start httpd
+sudo systemctl start vsftpd
+sudo systemctl start sshd
+sudo systemctl enable httpd
+sudo systemctl enable vsftpd
+sudo systemctl enable sshd
+sudo systemctl status httpd
+sudo systemctl status vsftpd
+sudo systemctl status sshd
+
+# 2. Bloquear tráfico de puertos 80, 21 y 22 con iptables
+sudo iptables -A INPUT -p tcp --dport 80 -j DROP
+sudo iptables -A INPUT -p tcp --dport 21 -j DROP
+sudo iptables -A INPUT -p tcp --dport 22 -j DROP
+sudo iptables -L -n -v
+
+# 3. Habilitar nuevamente el tráfico de puertos 80, 21 y 22 con iptables
+sudo iptables -D INPUT -p tcp --dport 80 -j DROP
+sudo iptables -D INPUT -p tcp --dport 21 -j DROP
+sudo iptables -D INPUT -p tcp --dport 22 -j DROP
+sudo iptables -L -n -v
+
+# 4. Bloquear tráfico usando firewall-cmd
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=ftp
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --reload
+sudo firewall-cmd --permanent --remove-service=http
+sudo firewall-cmd --permanent --remove-service=ftp
+sudo firewall-cmd --permanent --remove-service=ssh
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all
+
+# 5. Habilitar nuevamente el tráfico usando firewall-cmd
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=ftp
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all
