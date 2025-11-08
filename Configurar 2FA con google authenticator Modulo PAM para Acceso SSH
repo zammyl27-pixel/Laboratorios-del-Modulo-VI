@@ -1,0 +1,24 @@
+# 1. Instalar Google Authenticator PAM module
+sudo dnf install -y google-authenticator
+
+# 2. Ejecutar la configuración para el usuario SSH
+google-authenticator
+
+# 3. Editar PAM para usar Google Authenticator
+sudo vi /etc/pam.d/sshd
+# Agregar al final:
+# auth required pam_google_authenticator.so
+
+# 4. Editar configuración de SSH
+sudo vi /etc/ssh/sshd_config
+# Modificar o agregar:
+# ChallengeResponseAuthentication yes
+# PasswordAuthentication yes
+# UsePAM yes
+
+# 5. Reiniciar el servicio SSH
+sudo systemctl restart sshd
+
+# 6. Probar acceso SSH desde la máquina host
+ssh usuario@IP_de_la_VM
+# (Se pedirá primero la contraseña y luego el código 2FA)
