@@ -1,0 +1,27 @@
+# 1. Instalar dependencias
+sudo dnf install -y epel-release
+sudo dnf install -y snort
+
+# 2. Verificar instalación
+snort -V
+
+# 3. Crear directorio para reglas personalizadas
+sudo mkdir -p /etc/snort/rules
+
+# 4. Editar archivo de reglas
+sudo nano /etc/snort/rules/local.rules
+Dentro de local.rules, agregar las siguientes líneas:
+
+alert icmp any any -> $HOME_NET any (msg:"ICMP Detectado"; sid:1000001;)
+alert tcp any any -> $HOME_NET 21 (msg:"Tráfico al puerto 21 detectado"; sid:1000002;)
+alert tcp any any -> $HOME_NET 22 (msg:"Tráfico al puerto 22 detectado"; sid:1000003;)
+alert tcp any any -> $HOME_NET 80 (msg:"Tráfico al puerto 80 detectado"; sid:1000004;)
+
+
+Luego continuar con:
+
+# 5. Probar configuración
+sudo snort -T -c /etc/snort/snort.conf
+
+# 6. Ejecutar Snort con las reglas creadas
+sudo snort -A console -q -c /etc/snort/snort.conf -i eth0
