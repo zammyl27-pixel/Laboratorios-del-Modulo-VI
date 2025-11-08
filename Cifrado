@@ -1,0 +1,49 @@
+sudo dnf update && sudo yum update
+sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
+sudo subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
+sudo yum upgrade -y
+sudo nano /etc/ld.so.conf.d/local.conf  
+      /usr/local/lib 
+      /usr/local/lib64 
+
+sudo dnf install flex bison gcc gcc-c++ make cmake autoconf libtool git nano unzip wget libpcap-devel pcre-devel libdnet-devel hwloc-devel openssl-devel zlib-devel luajit-devel pkgconfig pkgconf libunwind-devel libnfnetlink-devel libnetfilter_queue-devel libmnl-devel xz-devel gperftools libuuid-devel hyperscan hyperscan-devel  -y
+
+###instalar libdaq
+git clone https://github.com/snort3/libdaq.git 
+cd libdaq/ 
+./bootstrap 
+./configure && make && sudo make install 
+sudo ldconfig 
+cd ../ 
+
+## instalar snort
+git clone https://github.com/snort3/snort3.git 
+cd snort3 
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH 
+export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH 
+export CFLAGS="-O3" 
+export CXXFLAGS="-O3 -fno-rtti" 
+./configure_cmake.sh --prefix=/usr/local/snort --enable-tcmalloc 
+
+cd build/ 
+make -j$(nproc) 
+sudo make -j$(nproc) install 
+cd ../../ 
+sudo ldconfig 
+/usr/local/snort/bin/snort
+sudo ln -s /usr/local/snort/bin/snort /usr/bin/snort
+snort -V
+
+## Configurar snort
+
+sudo nano /usr/local/snort/etc/snort/snort.lua
+       HOME_NET = '10.0.0.76/24'
+
+snort -T -c /usr/local/snort/etc/snort/snort.lua
+
+sudo ip link set dev ens160 promisc on
+
+sudo nano /usr/local/snort/etc/snort/local.rules
+       alert icmp any any -> any any ( msg:"ICMP Traffic Detected"; sid:10000001; metadata:policy security-ips alert; )
+
+sudo snort -c /usr/local/snort/etc/snort/snort.lua -R /usr/local/snort/etc/snort/local.rules -i ens160 -A alert_fast -s 65535 -k none
